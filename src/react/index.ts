@@ -1,5 +1,8 @@
-import {createElement} from './createElement';
+import {createElement} from './ReactElement';
+import {Component,PureComponent} from './ReactBaseClasses';
 
 export default {
-    createElement
+    createElement,
+    Component,
+    PureComponent
 }

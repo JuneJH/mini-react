@@ -1,4 +1,4 @@
-import ReactDOM from './ReactDom';
+import ReactDOM from './react-dom';
 import React from './react'
 
-ReactDOM.render( /*#__PURE__*/React.createElement("h1", null, "Hello, world!"), document.getElementById("root"));
+ReactDOM.render(React.createElement("h1", null, "Hello, world!"), document.getElementById("root"));
