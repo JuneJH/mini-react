@@ -1,3 +1,8 @@
+/**
+ * render函数，设置协调条件
+ * @param vDom
+ * @param container
+ */
 function render(vDom: any, container: any) {
     workInProgressRoot = {
         stateNode:container,
@@ -7,6 +12,10 @@ function render(vDom: any, container: any) {
     console.log(workInProgressRoot)
 }
 
+/**
+ * 更新原生组件
+ * @param workInProgress
+ */
 function updateHostComponent(workInProgress: any) {
     const { props } = workInProgress;
     if(!workInProgress.stateNode){
@@ -16,6 +25,10 @@ function updateHostComponent(workInProgress: any) {
 
 }
 
+/**
+ * 创建DOM
+ * @param workInProgress
+ */
 function createNode(workInProgress: any) {
     const { type,props } = workInProgress;
     let node = null;
@@ -26,12 +39,20 @@ function createNode(workInProgress: any) {
     return node;
 }
 
+/**
+ * 处理函数组件
+ * @param workInProgress
+ */
 function  updateFunctionComponent(workInProgress:any){
     const {type,props} = workInProgress;
     const children = type(props);
     reconcileChildren(workInProgress,children)
 }
 
+/**
+ * 处理类组件
+ * @param workInProgress
+ */
 function  updateClassComponent(workInProgress:any){
     const {type,props} = workInProgress;
     const instance = new type(props);
@@ -40,6 +61,11 @@ function  updateClassComponent(workInProgress:any){
 
 }
 
+/**
+ * 更新属性
+ * @param node
+ * @param props
+ */
 function updateProps(node:any,props:any){
     Object.keys(props).forEach((key:string)=>{
         if(key === "children"){
@@ -61,6 +87,11 @@ function updateProps(node:any,props:any){
     })
 }
 
+/**
+ * 协调子元素,生成fiber架构
+ * @param workInProgress
+ * @param children
+ */
 function reconcileChildren(workInProgress: any, children: any) {
     if(typeof children !== "object" && typeof  children !== "function"){
         return;
@@ -94,6 +125,10 @@ function reconcileChildren(workInProgress: any, children: any) {
 
 }
 
+/**
+ * 空闲时间工作
+ * @param idleDeadline
+ */
 function  workLoop(idleDeadline:any){
     while(idleDeadline.timeRemaining() > 0 && nextUnitWork){
         nextUnitWork =  performUintWork(nextUnitWork);
@@ -103,6 +138,10 @@ function  workLoop(idleDeadline:any){
     }
 }
 
+/**
+ * 执行最小单元，返回下一个
+ * @param workInProgress
+ */
 function  performUintWork(workInProgress:any){
     const {type} = workInProgress;
     if(typeof type === "function"){
@@ -122,6 +161,9 @@ function  performUintWork(workInProgress:any){
     }
 }
 
+/**
+ * 提交任务
+ */
 function  commitRoot(){
     commitWork(workInProgressRoot.child);
     workInProgressRoot = null;
