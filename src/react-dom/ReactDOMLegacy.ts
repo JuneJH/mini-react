@@ -9,9 +9,7 @@ function render(vDom: any, container: any) {
 
 function updateHostComponent(workInProgress: any) {
     const { props } = workInProgress;
-    console.log("updateHost",workInProgress)
     if(!workInProgress.stateNode){
-        console.log("runnn update")
         workInProgress.stateNode = createNode(workInProgress);
     }
     reconcileChildren(workInProgress,props.children);
@@ -27,6 +25,10 @@ function createNode(workInProgress: any) {
     return node;
 }
 function  updateFunctionComponent(workInProgress:any){
+    const {type,props} = workInProgress;
+    console.log(workInProgress)
+    const children = type(props);
+    reconcileChildren(workInProgress,children)
 
 }
 
@@ -99,7 +101,6 @@ function  performUintWork(workInProgress:any){
         updateHostComponent(workInProgress);
     }
     if(workInProgress.child){
-        console.log("have child",workInProgress.child)
         return workInProgress.child;
     }
     let nextWorkInProgress = workInProgress;
@@ -131,11 +132,7 @@ function commitWork(workInProgress:any){
 }
 let nextUnitWork:any = null;
 let workInProgressRoot:any = null;
-
 requestIdleCallback(workLoop)
-
-
-
 export {
     render
 }
