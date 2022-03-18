@@ -15,6 +15,7 @@ function updateHostComponent(workInProgress: any) {
     reconcileChildren(workInProgress,props.children);
 
 }
+
 function createNode(workInProgress: any) {
     const { type,props } = workInProgress;
     let node = null;
@@ -24,11 +25,18 @@ function createNode(workInProgress: any) {
     updateProps(node,props);
     return node;
 }
+
 function  updateFunctionComponent(workInProgress:any){
     const {type,props} = workInProgress;
-    console.log(workInProgress)
     const children = type(props);
     reconcileChildren(workInProgress,children)
+}
+
+function  updateClassComponent(workInProgress:any){
+    const {type,props} = workInProgress;
+    const instance = new type(props);
+    const children = instance.render();
+    reconcileChildren(workInProgress,children);
 
 }
 
@@ -85,6 +93,7 @@ function reconcileChildren(workInProgress: any, children: any) {
     }
 
 }
+
 function  workLoop(idleDeadline:any){
     while(idleDeadline.timeRemaining() > 0 && nextUnitWork){
         nextUnitWork =  performUintWork(nextUnitWork);
@@ -93,10 +102,11 @@ function  workLoop(idleDeadline:any){
         commitRoot();
     }
 }
+
 function  performUintWork(workInProgress:any){
     const {type} = workInProgress;
     if(typeof type === "function"){
-        updateFunctionComponent(workInProgress);
+        type.isClassComponent ?  updateClassComponent(workInProgress):updateFunctionComponent(workInProgress);
     }else{
         updateHostComponent(workInProgress);
     }
@@ -111,10 +121,12 @@ function  performUintWork(workInProgress:any){
         nextWorkInProgress = nextWorkInProgress.return;
     }
 }
+
 function  commitRoot(){
     commitWork(workInProgressRoot.child);
     workInProgressRoot = null;
 }
+
 function commitWork(workInProgress:any){
     if(!workInProgress){
         return;
@@ -130,9 +142,12 @@ function commitWork(workInProgress:any){
     commitWork(workInProgress.sibling);
 
 }
+
 let nextUnitWork:any = null;
 let workInProgressRoot:any = null;
+
 requestIdleCallback(workLoop)
+
 export {
     render
 }

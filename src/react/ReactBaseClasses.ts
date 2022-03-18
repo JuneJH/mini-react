@@ -1,4 +1,9 @@
-function Component (){
+class Component {
+    props:any
+    static isClassComponent = true;
+    constructor(props:any) {
+      this.props = props;
+    }
 
 }
 
