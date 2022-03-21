@@ -5,8 +5,8 @@
  */
 function render(vDom: any, container: any) {
     workInProgressRoot = {
-        stateNode:container,
-        props:{children:vDom}
+        stateNode: container,
+        props: { children: vDom }
     };
     nextUnitWork = workInProgressRoot;
     console.log(workInProgressRoot)
@@ -18,10 +18,10 @@ function render(vDom: any, container: any) {
  */
 function updateHostComponent(workInProgress: any) {
     const { props } = workInProgress;
-    if(!workInProgress.stateNode){
+    if (!workInProgress.stateNode) {
         workInProgress.stateNode = createNode(workInProgress);
     }
-    reconcileChildren(workInProgress,props.children);
+    reconcileChildren(workInProgress, props.children);
 
 }
 
@@ -30,12 +30,12 @@ function updateHostComponent(workInProgress: any) {
  * @param workInProgress
  */
 function createNode(workInProgress: any) {
-    const { type,props } = workInProgress;
+    const { type, props } = workInProgress;
     let node = null;
     if (typeof type === "string") {
         node = document.createElement(type);
     }
-    updateProps(node,props);
+    updateProps(node, props);
     return node;
 }
 
@@ -43,46 +43,53 @@ function createNode(workInProgress: any) {
  * 处理函数组件
  * @param workInProgress
  */
-function  updateFunctionComponent(workInProgress:any){
-    const {type,props} = workInProgress;
+function updateFunctionComponent(workInProgress: any) {
+    const { type, props } = workInProgress;
+    fiberWorking = workInProgress;
+    fiberWorking.hooks = [];
+    fiberWorking.hooksIndex = 0;
     const children = type(props);
-    reconcileChildren(workInProgress,children)
+    reconcileChildren(workInProgress, children)
 }
 
 /**
  * 处理类组件
  * @param workInProgress
  */
-function  updateClassComponent(workInProgress:any){
-    const {type,props} = workInProgress;
+function updateClassComponent(workInProgress: any) {
+    const { type, props } = workInProgress;
     const instance = new type(props);
     const children = instance.render();
-    reconcileChildren(workInProgress,children);
+    reconcileChildren(workInProgress, children);
 
 }
-
+const eventMap: any = {
+    "onClick": "onclick"
+}
 /**
  * 更新属性
  * @param node
  * @param props
  */
-function updateProps(node:any,props:any){
-    Object.keys(props).forEach((key:string)=>{
-        if(key === "children"){
-            if(typeof props[key] === "string"){
-                const  text = document.createTextNode(props[key]);
+function updateProps(node: any, props: any) {
+    Object.keys(props).forEach((key: string) => {
+        if (key === "children") {
+            if (typeof props[key] === "string") {
+                const text = document.createTextNode(props[key]);
                 node.appendChild(text);
-            }else if(Array.isArray(props[key])){
-                props[key].forEach((p:any)=>{
-                    if(typeof p === "string"){
-                        const  text = document.createTextNode(p);
+            } else if (Array.isArray(props[key])) {
+                props[key].forEach((p: any) => {
+                    if (typeof p === "string" || typeof p === "number") {
+                        const text = document.createTextNode(p + "");
                         node.appendChild(text);
                     }
                 })
             }
 
-        }else {
-            node.setAttribute(key,props[key]);
+        } else if (key.includes("on")) {
+            node[eventMap[key]] = props[key];
+        } else {
+            node.setAttribute(key, props[key]);
         }
     })
 }
@@ -93,69 +100,79 @@ function updateProps(node:any,props:any){
  * @param children
  */
 function reconcileChildren(workInProgress: any, children: any) {
-    if(typeof children !== "object" && typeof  children !== "function"){
+    if (typeof children !== "object" && typeof children !== "function") {
         return;
     }
-    children = Array.isArray(children)?children:[children];
-    let previousNewFiber:any = null;
+    children = Array.isArray(children) ? children : [children];
+    let previousNewFiber: any = null;
     let flag = 0;
-    for(let i = 0; i < children.length; i ++){
+    let oldFiber = workInProgress.base && workInProgress.base.child;
+    for (let i = 0; i < children.length; i++) {
         const child = children[i];
-        if(typeof child !== "object"){
-            if(i === 0){
-                flag ++;
+        const isSame = oldFiber && child && oldFiber.type === child.type;
+        if (typeof child !== "object") {
+            if (i === 0) {
+                flag++;
             }
             continue;
         }
-        const newFiber = {
-            child:null,
-            sibling:null,
-            return:workInProgress,
-            type:child.type,
-            props:child.props,
-            stateNode:null
+        let newFiber = null;
+        if(isSame){
+       
+            newFiber = {
+                child: oldFiber.child,
+                sibling: oldFiber.child,
+                return: oldFiber.return,
+                type: oldFiber.type,
+                props: oldFiber.props,
+                stateNode: oldFiber.stateNode,
+                base:oldFiber,
+                flag:"UPDATE"
+            }
+            console.log("重用",oldFiber,newFiber)
         }
-        if(i === flag){
+        if(!isSame && child){
+            newFiber = {
+                child: null,
+                sibling: null,
+                return: workInProgress,
+                type: child.type,
+                props: child.props,
+                stateNode: null,
+                base:null,
+                flag:"ADD"
+            }
+        }
+        if(oldFiber){
+            oldFiber = oldFiber.sibling;
+        }
+        if (i === flag) {
             workInProgress.child = newFiber;
-        }else{
+        } else {
             previousNewFiber.sibling = newFiber;
         }
         previousNewFiber = newFiber;
     }
 
 }
-
-/**
- * 空闲时间工作
- * @param idleDeadline
- */
-function  workLoop(idleDeadline:any){
-    while(idleDeadline.timeRemaining() > 0 && nextUnitWork){
-        nextUnitWork =  performUintWork(nextUnitWork);
-    }
-    if(!nextUnitWork && workInProgressRoot){
-        commitRoot();
-    }
-}
-
 /**
  * 执行最小单元，返回下一个
  * @param workInProgress
  */
-function  performUintWork(workInProgress:any){
-    const {type} = workInProgress;
-    if(typeof type === "function"){
-        type.isClassComponent ?  updateClassComponent(workInProgress):updateFunctionComponent(workInProgress);
-    }else{
+function performUintWork(workInProgress: any) {
+    const { type } = workInProgress;
+    if (typeof type === "function") {
+        type.isClassComponent ? updateClassComponent(workInProgress) : updateFunctionComponent(workInProgress);
+    } else {
         updateHostComponent(workInProgress);
     }
-    if(workInProgress.child){
+    if (workInProgress.child) {
         return workInProgress.child;
     }
     let nextWorkInProgress = workInProgress;
-    while (nextWorkInProgress){
-        if(nextWorkInProgress.sibling){
-            return  nextWorkInProgress.sibling;
+    while (nextWorkInProgress) {
+        if (nextWorkInProgress.sibling) {
+            return nextWorkInProgress.sibling;
         }
         nextWorkInProgress = nextWorkInProgress.return;
     }
@@ -164,32 +181,65 @@ function  performUintWork(workInProgress:any){
 /**
  * 提交任务
  */
-function  commitRoot(){
+function commitRoot() {
     commitWork(workInProgressRoot.child);
+    fiberRoot = workInProgressRoot;
     workInProgressRoot = null;
 }
 
-function commitWork(workInProgress:any){
-    if(!workInProgress){
+function commitWork(workInProgress: any) {
+    if (!workInProgress) {
         return;
     }
     let parentFiber = workInProgress.return;
-    while (!parentFiber.stateNode){
+    while (!parentFiber.stateNode) {
         parentFiber = parentFiber.return;
     }
-    if(workInProgress.stateNode){
+    if (workInProgress.stateNode) {
         parentFiber.stateNode.appendChild(workInProgress.stateNode);
     }
     commitWork(workInProgress.child);
     commitWork(workInProgress.sibling);
 
 }
+/**
+ * 空闲时间工作
+ * @param idleDeadline
+ */
+function workLoop(idleDeadline: any) {
+    while (idleDeadline.timeRemaining() > 0 && nextUnitWork) {
+        console.log("更新",nextUnitWork)
+        nextUnitWork = performUintWork(nextUnitWork);
+    }
+    if (!nextUnitWork && workInProgressRoot) {
+        commitRoot();
+    }
+    requestIdleCallback(workLoop);
+}
+let nextUnitWork: any = null;
+let workInProgressRoot: any = null;
+let fiberRoot: any = null;
+let fiberWorking: any = null;
 
-let nextUnitWork:any = null;
-let workInProgressRoot:any = null;
+function setWorkInProgressRoot(val: any) {
+    workInProgressRoot = val;
+}
+function setNextUnitWork(val: any) {
+    nextUnitWork = val
+}
+function getFiberRoot(): any {
+    return fiberRoot;
+}
+function getFiberWorking() {
+    return fiberWorking;
+}
 
 requestIdleCallback(workLoop)
 
 export {
-    render
+    render,
+    setWorkInProgressRoot,
+    setNextUnitWork,
+    getFiberRoot,
+    getFiberWorking
 }
