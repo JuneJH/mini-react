@@ -1,11 +1,13 @@
 import ReactDOM from './react-dom';
-import React from './react';
+import React,{useState} from './react';
 
 function Title(props:any) {
+    const [state,setState] = useState(0);
     return React.createElement(
         "div",
         null,
-        props.title
+        props.title,
+        React.createElement("button",{onClick:()=>{setState(state+1)}},state)
     );
 }
 class HelloMessage extends React.Component {
