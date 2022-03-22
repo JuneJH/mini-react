@@ -9,7 +9,6 @@ function render(vDom: any, container: any) {
         props: { children: vDom }
     };
     nextUnitWork = workInProgressRoot;
-    console.log(workInProgressRoot)
 }
 
 /**
@@ -80,8 +79,7 @@ function updateProps(node: any, props: any) {
             } else if (Array.isArray(props[key])) {
                 props[key].forEach((p: any) => {
                     if (typeof p === "string" || typeof p === "number") {
-                        const text = document.createTextNode(p + "");
-                        node.appendChild(text);
+                        node.innerHTML = p;
                     }
                 })
             }
@@ -100,36 +98,25 @@ function updateProps(node: any, props: any) {
  * @param children
  */
 function reconcileChildren(workInProgress: any, children: any) {
-    if (typeof children !== "object" && typeof children !== "function") {
-        return;
-    }
     children = Array.isArray(children) ? children : [children];
+    children = children.filter((child:any)=>typeof child === "object");
     let previousNewFiber: any = null;
-    let flag = 0;
     let oldFiber = workInProgress.base && workInProgress.base.child;
     for (let i = 0; i < children.length; i++) {
         const child = children[i];
         const isSame = oldFiber && child && oldFiber.type === child.type;
-        if (typeof child !== "object") {
-            if (i === 0) {
-                flag++;
-            }
-            continue;
-        }
         let newFiber = null;
         if(isSame){
-       
             newFiber = {
                 child: oldFiber.child,
-                sibling: oldFiber.child,
+                sibling: oldFiber.sibling,
                 return: oldFiber.return,
-                type: oldFiber.type,
-                props: oldFiber.props,
+                type: child.type,
+                props: child.props,
                 stateNode: oldFiber.stateNode,
                 base:oldFiber,
                 flag:"UPDATE"
             }
-            console.log("重用",oldFiber,newFiber)
         }
         if(!isSame && child){
             newFiber = {
@@ -146,7 +133,7 @@ function reconcileChildren(workInProgress: any, children: any) {
         if(oldFiber){
             oldFiber = oldFiber.sibling;
         }
-        if (i === flag) {
+        if (i === 0) {
             workInProgress.child = newFiber;
         } else {
             previousNewFiber.sibling = newFiber;
@@ -195,8 +182,10 @@ function commitWork(workInProgress: any) {
     while (!parentFiber.stateNode) {
         parentFiber = parentFiber.return;
     }
-    if (workInProgress.stateNode) {
+    if (workInProgress.flag === "ADD"  && workInProgress.stateNode) {
         parentFiber.stateNode.appendChild(workInProgress.stateNode);
+    }else if(workInProgress.flag === "UPDATE"  && workInProgress.stateNode){
+        updateProps(workInProgress.stateNode,workInProgress.props);
     }
     commitWork(workInProgress.child);
     commitWork(workInProgress.sibling);
@@ -208,7 +197,6 @@ function commitWork(workInProgress: any) {
  */
 function workLoop(idleDeadline: any) {
     while (idleDeadline.timeRemaining() > 0 && nextUnitWork) {
-        console.log("更新",nextUnitWork)
         nextUnitWork = performUintWork(nextUnitWork);
     }
     if (!nextUnitWork && workInProgressRoot) {

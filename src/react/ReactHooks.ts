@@ -2,7 +2,7 @@ import { setWorkInProgressRoot, setNextUnitWork, getFiberRoot, getFiberWorking }
 
 export function useState(initState: any): [state: any, setState: any] {
     const workInProgress = getFiberWorking();
-    const baseHook = workInProgress.base && workInProgress.base.hooks[workInProgress.base.hooksIndex];
+    const baseHook = workInProgress.base && workInProgress.base.hooks[workInProgress.hooksIndex];
     const hook = baseHook ? {
         state: baseHook.state,
         queue: baseHook.queue,
@@ -13,7 +13,6 @@ export function useState(initState: any): [state: any, setState: any] {
     const setState = (val: any) => {
         const workInProgressRoot = getFiberRoot();
         hook.queue.push(val);
-        console.log(hook.queue)
         const fiberTemp = {
             stateNode: workInProgressRoot.stateNode,
             props: workInProgressRoot.props,
