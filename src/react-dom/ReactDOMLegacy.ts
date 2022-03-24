@@ -1,3 +1,21 @@
+let nextUnitWork: any = null;
+let workInProgressRoot: any = null;
+let fiberRoot: any = null;
+let fiberWorking: any = null;
+
+function setWorkInProgressRoot(val: any) {
+    workInProgressRoot = val;
+}
+function setNextUnitWork(val: any) {
+    nextUnitWork = val
+}
+function getFiberRoot(): any {
+    return fiberRoot;
+}
+function getFiberWorking() {
+    return fiberWorking;
+}
+
 /**
  * render函数，设置协调条件
  * @param vDom
@@ -203,23 +221,6 @@ function workLoop(idleDeadline: any) {
         commitRoot();
     }
     requestIdleCallback(workLoop);
-}
-let nextUnitWork: any = null;
-let workInProgressRoot: any = null;
-let fiberRoot: any = null;
-let fiberWorking: any = null;
-
-function setWorkInProgressRoot(val: any) {
-    workInProgressRoot = val;
-}
-function setNextUnitWork(val: any) {
-    nextUnitWork = val
-}
-function getFiberRoot(): any {
-    return fiberRoot;
-}
-function getFiberWorking() {
-    return fiberWorking;
 }
 
 requestIdleCallback(workLoop)
