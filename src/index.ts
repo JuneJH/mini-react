@@ -7,7 +7,9 @@ function Title(props:any) {
     return React.createElement(
         "div",
         null,
-        React.createElement("button",{onClick:()=>{setState(state+1)}},state)
+        React.createElement("button",{onClick:()=>{setState(state+1)}},state),
+        state % 2 == 0 ? React.createElement("div",null,"测试是否显示"):null,
+
     );
 }
 class HelloMessage extends React.Component {

@@ -2,6 +2,7 @@ let nextUnitWork: any = null;
 let workInProgressRoot: any = null;
 let fiberRoot: any = null;
 let fiberWorking: any = null;
+let delDep:any = [];
 
 function setWorkInProgressRoot(val: any) {
     workInProgressRoot = val;
@@ -15,6 +16,12 @@ function getFiberRoot(): any {
 function getFiberWorking() {
     return fiberWorking;
 }
+function setDelDep(val:any){
+    delDep = val;
+}
+function getDelDep():any{
+    return delDep;
+}
 
 /**
  * render函数，设置协调条件
@@ -27,6 +34,7 @@ function render(vDom: any, container: any) {
         props: { children: vDom }
     };
     nextUnitWork = workInProgressRoot;
+    setDelDep([]);
 }
 
 /**
@@ -39,7 +47,6 @@ function updateHostComponent(workInProgress: any) {
         workInProgress.stateNode = createNode(workInProgress);
     }
     reconcileChildren(workInProgress, props.children);
-
 }
 
 /**
@@ -148,6 +155,10 @@ function reconcileChildren(workInProgress: any, children: any) {
                 flag:"ADD"
             }
         }
+        if(!isSame && oldFiber){
+            oldFiber.flag = "DELETE"
+            delDep.push(oldFiber);
+        }
         if(oldFiber){
             oldFiber = oldFiber.sibling;
         }
@@ -187,6 +198,7 @@ function performUintWork(workInProgress: any) {
  * 提交任务
  */
 function commitRoot() {
+    delDep.forEach(commitWork);
     commitWork(workInProgressRoot.child);
     fiberRoot = workInProgressRoot;
     workInProgressRoot = null;
@@ -204,9 +216,18 @@ function commitWork(workInProgress: any) {
         parentFiber.stateNode.appendChild(workInProgress.stateNode);
     }else if(workInProgress.flag === "UPDATE"  && workInProgress.stateNode){
         updateProps(workInProgress.stateNode,workInProgress.props);
+    }else if(workInProgress.flag === "DELETE" && workInProgress.stateNode){
+        commitDel(parentFiber,workInProgress);
     }
     commitWork(workInProgress.child);
     commitWork(workInProgress.sibling);
+}
+function commitDel(parentFiber:any,workInProgress:any){
+    if(workInProgress.stateNode){
+        parentFiber.stateNode.removeChild(workInProgress.stateNode);
+    }else{
+        commitDel(parentFiber,workInProgress.child);
+    }
 
 }
 /**
@@ -230,5 +251,6 @@ export {
     setWorkInProgressRoot,
     setNextUnitWork,
     getFiberRoot,
-    getFiberWorking
+    getFiberWorking,
+    setDelDep
 }

@@ -1,4 +1,4 @@
-import { setWorkInProgressRoot, setNextUnitWork, getFiberRoot, getFiberWorking } from '../react-dom';
+import { setWorkInProgressRoot, setNextUnitWork, getFiberRoot, getFiberWorking,setDelDep } from '../react-dom';
 
 export function useState(initState: any): [state: any, setState: any] {
     const workInProgress = getFiberWorking();
@@ -20,6 +20,7 @@ export function useState(initState: any): [state: any, setState: any] {
         }
         setNextUnitWork(fiberTemp);
         setWorkInProgressRoot(fiberTemp);
+        setDelDep([]);
     }
 
 
