@@ -1,6 +1,10 @@
 import ReactDOM from './react-dom';
 import React,{useState} from './react';
+import { createFiber } from './react-reconciler';
+import { HostComponent } from './react-reconciler/ReactWorkTags';
 
+const fiber = createFiber({tag:HostComponent,key:123,pendingProps:{}})
+console.log("fiber",fiber);
 function Title(props:any) {
     const [state,setState] = useState(0);
     console.log("获得的state",state)
