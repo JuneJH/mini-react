@@ -1,8 +1,10 @@
+import { ClassComponent, createFiber, Deletion, FunctionComponent, HostComponent, Placement, Update } from "../react-reconciler";
+
 let nextUnitWork: any = null;
 let workInProgressRoot: any = null;
 let fiberRoot: any = null;
 let fiberWorking: any = null;
-let delDep:any = [];
+let delDep: any = [];
 
 function setWorkInProgressRoot(val: any) {
     workInProgressRoot = val;
@@ -16,10 +18,10 @@ function getFiberRoot(): any {
 function getFiberWorking() {
     return fiberWorking;
 }
-function setDelDep(val:any){
+function setDelDep(val: any) {
     delDep = val;
 }
-function getDelDep():any{
+function getDelDep(): any {
     return delDep;
 }
 
@@ -124,42 +126,37 @@ function updateProps(node: any, props: any) {
  */
 function reconcileChildren(workInProgress: any, children: any) {
     children = Array.isArray(children) ? children : [children];
-    children = children.filter((child:any)=>typeof child === "object");
+    children = children.filter((child: any) => typeof child === "object");
     let previousNewFiber: any = null;
-    let oldFiber = workInProgress.base && workInProgress.base.child;
+    let oldFiber = workInProgress.elementType && workInProgress.elementType.child;
     for (let i = 0; i < children.length; i++) {
         const child = children[i];
         const isSame = oldFiber && child && oldFiber.type === child.type;
         let newFiber = null;
-        if(isSame){
-            newFiber = {
-                child: oldFiber.child,
-                sibling: oldFiber.sibling,
-                return: oldFiber.return,
-                type: child.type,
-                props: child.props,
-                stateNode: oldFiber.stateNode,
-                base:oldFiber,
-                flag:"UPDATE"
-            }
+        if (isSame) {
+            const tag = typeof child.type === "function" ? child.type.isClassComponent ? ClassComponent : FunctionComponent : HostComponent;
+            newFiber = createFiber({ tag, key: child.key, pendingProps: child.props });
+            newFiber.flags = Update;
+            newFiber.stateNode = oldFiber.stateNode;
+            newFiber.child = oldFiber.child;
+            newFiber.sibling = oldFiber.sibling;
+            newFiber.return = oldFiber.return;
+            newFiber.type = oldFiber.type;
+            newFiber.stateNode = oldFiber.stateNode;
+            newFiber.elementType = oldFiber;
         }
-        if(!isSame && child){
-            newFiber = {
-                child: null,
-                sibling: null,
-                return: workInProgress,
-                type: child.type,
-                props: child.props,
-                stateNode: null,
-                base:null,
-                flag:"ADD"
-            }
+        if (!isSame && child) {
+            const tag = typeof child.type === "function" ? child.type.isClassComponent ? ClassComponent : FunctionComponent : HostComponent;
+            newFiber = createFiber({ tag, key: child.key, pendingProps: child.props });
+            newFiber.flags = Placement;
+            newFiber.type = child.type;
+            newFiber.return = workInProgress;
         }
-        if(!isSame && oldFiber){
-            oldFiber.flag = "DELETE"
+        if (!isSame && oldFiber) {
+            oldFiber.flags = Deletion
             delDep.push(oldFiber);
         }
-        if(oldFiber){
+        if (oldFiber) {
             oldFiber = oldFiber.sibling;
         }
         if (i === 0) {
@@ -182,6 +179,7 @@ function performUintWork(workInProgress: any) {
     } else {
         updateHostComponent(workInProgress);
     }
+
     if (workInProgress.child) {
         return workInProgress.child;
     }
@@ -212,21 +210,21 @@ function commitWork(workInProgress: any) {
     while (!parentFiber.stateNode) {
         parentFiber = parentFiber.return;
     }
-    if (workInProgress.flag === "ADD"  && workInProgress.stateNode) {
+    if (workInProgress.flags === Placement && workInProgress.stateNode) {
         parentFiber.stateNode.appendChild(workInProgress.stateNode);
-    }else if(workInProgress.flag === "UPDATE"  && workInProgress.stateNode){
-        updateProps(workInProgress.stateNode,workInProgress.props);
-    }else if(workInProgress.flag === "DELETE" && workInProgress.stateNode){
-        commitDel(parentFiber,workInProgress);
+    } else if (workInProgress.flags === Update && workInProgress.stateNode) {
+        updateProps(workInProgress.stateNode, workInProgress.props);
+    } else if (workInProgress.flags === Deletion && workInProgress.stateNode) {
+        commitDel(parentFiber, workInProgress);
     }
     commitWork(workInProgress.child);
     commitWork(workInProgress.sibling);
 }
-function commitDel(parentFiber:any,workInProgress:any){
-    if(workInProgress.stateNode){
+function commitDel(parentFiber: any, workInProgress: any) {
+    if (workInProgress.stateNode) {
         parentFiber.stateNode.removeChild(workInProgress.stateNode);
-    }else{
-        commitDel(parentFiber,workInProgress.child);
+    } else {
+        commitDel(parentFiber, workInProgress.child);
     }
 
 }

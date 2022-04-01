@@ -48,6 +48,10 @@ class FiberNode {
         this.childLanes = NoLanes;
         this.return = null;
     }
+    // 兼容处理
+    get props(){
+        return this.pendingProps;
+    }
 }
 
 function createFiber(props:FiberParams){
