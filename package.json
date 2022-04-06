@@ -7,6 +7,10 @@
   "author": "JuneJH <15310487388@163.com>",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.17.8",
+    "@babel/plugin-transform-react-jsx": "^7.17.3",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
     "clean-webpack-plugin": "^4.0.0",
     "html-webpack-plugin": "^5.5.0",
     "ts-loader": "^9.2.8",
@@ -20,7 +24,6 @@
     "dev": "webpack-dev-server"
   },
   "dependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/preset-react": "^7.16.7"
+    "babel-loader": "^8.2.4"
   }
 }
