@@ -1,8 +1,7 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 module.exports = {
-    // entry: "./src/index.ts",
-    entry: "./src/testTsx.js",
+    entry: "./src/index.tsx",
 
 
 
@@ -12,10 +11,14 @@ module.exports = {
     ],
     module: {
         rules: [
-            // {
-            //     test: /.ts$/,
-            //     loader: "ts-loader"
-            // },
+            {
+                test: /.ts$/,
+                loader: "ts-loader"
+            },
+            {
+                test: /.tsx$/,
+                loader: "ts-loader"
+            },
             // {
             //     test: /\.tsx?$/,
             //     use: [
@@ -35,21 +38,21 @@ module.exports = {
                    
             //     ],
             // },
-            {
-                test: /\.js$/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env'],
-                        plugins: [
-                            [
-                                '@babel/plugin-transform-react-jsx',
-                                { pragma: 'createElement' },  //将React.createElement改成createElement
-                            ],
-                        ],
-                    },
-                },
-            },
+            // {
+            //     test: /\.js$/,
+            //     use: {
+            //         loader: 'babel-loader',
+            //         options: {
+            //             presets: ['@babel/preset-env'],
+            //             plugins: [
+            //                 [
+            //                     '@babel/plugin-transform-react-jsx',
+            //                     { pragma: 'createElement' },  //将React.createElement改成createElement
+            //                 ],
+            //             ],
+            //         },
+            //     },
+            // },
         ]
     },
     resolve: {
