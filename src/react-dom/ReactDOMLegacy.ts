@@ -31,6 +31,7 @@ function getDelDep(): any {
  * @param container
  */
 function render(vDom: any, container: any) {
+    console.log("cofom",vDom)
     workInProgressRoot = {
         stateNode: container,
         props: { children: vDom }
@@ -203,6 +204,7 @@ function commitRoot() {
 }
 
 function commitWork(workInProgress: any) {
+    console.log(workInProgress)
     if (!workInProgress) {
         return;
     }
