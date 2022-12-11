@@ -20,8 +20,8 @@
     "webpack-dev-server": "^4.7.4"
   },
   "scripts": {
-    "build": "webpack --mode=production",
-    "dev": "webpack-dev-server"
+    "build": "webpack",
+    "dev": "webpack-dev-server --env=dev"
   },
   "dependencies": {
     "babel-loader": "^8.2.4"

@@ -1,62 +1,23 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-module.exports = {
-    entry: "./src/index.tsx",
+const baseConfig = require("./scripts/webpack.base");
+const productionConfig = require("./scripts/webpack.production");
+const develpomentConfig = require("./scripts/webpack.dev");
 
-
-
-    plugins: [
-        new HtmlWebpackPlugin({ template: "./public/index.html" }),
-        new CleanWebpackPlugin()
-    ],
-    module: {
-        rules: [
-            {
-                test: /.ts$/,
-                loader: "ts-loader"
-            },
-            {
-                test: /.tsx$/,
-                loader: "ts-loader"
-            },
-            // {
-            //     test: /\.tsx?$/,
-            //     use: [
-            //         {
-            //             loader: 'babel-loader',
-            //             options: {
-            //                 presets: [
-            //                     '@babel/preset-env',
-            //                     [
-            //                         '@babel/preset-react',
-            //                         // { pragma: 'createElement' },
-            //                     ],
-            //                 ],
-            //             },
-            //         },
-            //         { loader: 'ts-loader' },
-                   
-            //     ],
-            // },
-            // {
-            //     test: /\.js$/,
-            //     use: {
-            //         loader: 'babel-loader',
-            //         options: {
-            //             presets: ['@babel/preset-env'],
-            //             plugins: [
-            //                 [
-            //                     '@babel/plugin-transform-react-jsx',
-            //                     { pragma: 'createElement' },  //将React.createElement改成createElement
-            //                 ],
-            //             ],
-            //         },
-            //     },
-            // },
-        ]
-    },
-    resolve: {
-        extensions: [".ts", ".js", ".tsx"]
-    },
-    mode: "development"
+/**
+ * webpack不仅可以直接导出一个对象，也可以是一个函数，其函数返回应该是一个webpack的配置对象
+ * @param {*webpack会将命令行参数带过来} env 
+ * @returns 
+ */
+module.exports = env=>{
+    console.log("env",env)
+    if(env?.dev){
+        return {
+            ...baseConfig,
+            ...develpomentConfig
+        }
+    }else{
+        return {
+            ...baseConfig,
+            ...productionConfig
+        }
+    }
 }
