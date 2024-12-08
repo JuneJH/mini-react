@@ -1,29 +1,30 @@
 {
   "name": "mini-react",
   "version": "1.0.0",
-  "description": "mini react",
+  "description": "",
   "main": "index.js",
-  "repository": "git@github.com:JuneJH/mini-react.git",
-  "author": "JuneJH <15310487388@163.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/plugin-transform-react-jsx": "^7.17.3",
-    "@babel/preset-env": "^7.16.11",
-    "@babel/preset-react": "^7.16.7",
-    "clean-webpack-plugin": "^4.0.0",
-    "html-webpack-plugin": "^5.5.0",
-    "ts-loader": "^9.2.8",
-    "typescript": "^4.6.2",
-    "webpack": "^5.70.0",
-    "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.7.4"
-  },
   "scripts": {
-    "build": "webpack",
-    "dev": "webpack-dev-server --env=dev"
+    "lint": "eslint --fix --quiet ./packages",
+    "prepare": "husky",
+    "build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/react.config.js"
   },
-  "dependencies": {
-    "babel-loader": "^8.2.4"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.0",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "commitlint": "^19.6.0",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.13.0",
+    "husky": "^9.1.7",
+    "parser": "link:@typescript-eslint/eslint-plugin,@typescript-eslint/parser",
+    "prettier": "^3.4.2",
+    "rollup": "^4.28.1",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "typescript-eslint": "^8.17.0"
   }
 }
