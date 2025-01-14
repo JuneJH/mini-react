@@ -11,6 +11,9 @@
 		"moduleResolution": "node", // 模块解析策略，推荐使用 `node`
 		"allowJs": true, // 允许编译 JavaScript 文件
 		"skipDefaultLibCheck": true, // 跳过默认库文件检查
-		"baseUrl": "./packages"
+		"baseUrl": "./packages",
+		"paths": {
+			"hostConfig": ["./reconciler/src/hostConfig.ts"]
+		}
 	}
 }

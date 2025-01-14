@@ -1,16 +1,39 @@
 import { beginWork } from "./beginWork";
 import { completeWork } from "./completeWork";
-import { FiberNode } from "./fiber";
+import { createWorkInProgress, FiberNode } from "./fiber";
+import { HostRoot } from "./workTags";
+import { FiberRootNode } from "./fiber";
+import { Props } from "shared/ReactTypes";
 
 let workInProgress: FiberNode | null = null;
 
 
-function prepareFreshStack(fiber: FiberNode) {
-    workInProgress = fiber;
+function prepareFreshStack(root: FiberRootNode) {
+    workInProgress = createWorkInProgress(root.current, {} as Props);
 
 }
 
-export function renderRoot(root: FiberNode) {
+export function scheduleUpdateOnFiber(fiber: FiberNode) {
+    const root = markUpdateFromFiberToRoot(fiber);
+    if (root !== null) {
+        renderRoot(root);
+    }
+}
+
+export function markUpdateFromFiberToRoot(fiber: FiberNode) {
+    let node = fiber;
+    let parent = node.return;
+    while (parent !== null) {
+        node = parent;
+        parent = node.return;
+    }
+    if (node.tag === HostRoot) {
+        return node.stateNode;
+    }
+    return null;
+}
+
+export function renderRoot(root: FiberRootNode) {
     // 初始化
     prepareFreshStack(root);
 
@@ -18,7 +41,9 @@ export function renderRoot(root: FiberNode) {
         try {
             workLoop();
         } catch (error) {
-            console.error("workLoop", error);
+            if (__DEV__) {
+                console.error("workLoop", error);
+            }
             workInProgress = null;
         }
 
